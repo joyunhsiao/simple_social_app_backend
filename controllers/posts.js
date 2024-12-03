@@ -1,3 +1,4 @@
+const { successHandle, errorHandle } = require("../service/responseHandle");
 const Post = require("../models/postModel");
 
 const posts = {
@@ -9,10 +10,7 @@ const posts = {
       select: "name photo"
     }).sort(timeSort);
     
-    res.status(200).json({
-      'status': 'success',
-      'post': allPosts
-    });
+    successHandle(res, allPosts);
   },
   async createPost(req, res) {
     try{
@@ -22,15 +20,9 @@ const posts = {
         content: body.content
       });
   
-      res.status(200).json({
-        'status': 'success',
-        'post': newPost
-      });
+      successHandle(res, newPost);
     }catch(err){
-      res.status(400).json({
-        "status": "false",
-        "message": err.message
-      });
+      errorHandle(res, err.message);
     }
   },
 };
