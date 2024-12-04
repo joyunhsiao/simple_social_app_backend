@@ -44,6 +44,24 @@ const posts = {
       errorHandle(res, err.message);
     }
   },
+  async updatePosts(req, res) {
+    try{
+      const { body } = req;
+      const id = req.param.id;
+      if (await Post.findById(id) !== null){
+        if(body.content){
+          const updatePost = await Post.findByIdAndUpdate(id); // todo
+          successHandle(res, "The post has been successfully updated.", updatePost);
+        }else{
+          errorHandle(res, "Please provide at least a name or content to proceed.");
+        }
+      }else{
+        errorHandle(res, "No matching record was found.");
+      }
+    }catch(err){
+      errorHandle(res, err.message);
+    }
+  }
 };
 
 module.exports = posts;
