@@ -36,11 +36,11 @@ const posts = {
     }
   }),
   updatePosts: responseHandle.errorAsync(async (req, res, next) => {
-    const { body } = req;
+    const content = req.body.content;
     const id = req.param.id;
     if (await Post.findById(id) !== null){
-      if(body.content){
-        const updatePost = await Post.findByIdAndUpdate(id); // todo
+      if(content){
+        const updatePost = await Post.findByIdAndUpdate(id, { content }, { new: true, runValidators: true });
         responseHandle.success(res, "The post has been successfully updated.", updatePost);
       }else{
         responseHandle.errorNew(400, "Please provide at least a name or content to proceed.", next);
