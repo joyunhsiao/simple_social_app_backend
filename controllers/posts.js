@@ -1,14 +1,12 @@
 const { successHandle, errorHandle } = require("../service/responseHandle");
 const Post = require("../models/postModel");
+const { getPopulatedPosts } = require("../service/postService");
 
 const posts = {
   async getPosts(req, res) {
     const timeSort = req.query.timeSort === "asc" ? "createdAt" : "-createdAt";
     const q = req.query.q !== undefined ? {"content": new RegExp(req.query.q)} : {};
-    const allPosts = await Post.find(q).populate({
-      path: "user",
-      select: "name photo"
-    }).sort(timeSort);
+    const allPosts = await getPopulatedPosts(q, timeSort);
     
     successHandle(res, allPosts);
   },
@@ -28,10 +26,7 @@ const posts = {
   async deleteAllPosts(req, res) {
     try{
       await Post.deleteMany({});
-      const allPosts = await Post.find().populate({
-        path: "user",
-        select: "name photo"
-      });
+      const allPosts = await getPopulatedPosts();
       successHandle(res, allPosts);
     }catch(err){
       errorHandle(res, err.message);
@@ -42,10 +37,7 @@ const posts = {
       const id = req.params.id;
       if (await Post.findById(id) !== null) {
         await Post.findByIdAndDelete(id);
-        const allPosts = await Post.find().populate({
-          path: "user",
-          select: "name photo"
-        });
+        const allPosts = await getPopulatedPosts();
         successHandle(res, allPosts);
       }else{
         errorHandle(res, "No matching record was found.");
