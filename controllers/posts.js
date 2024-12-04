@@ -1,67 +1,54 @@
-const { successHandle, errorHandle } = require("../service/responseHandle");
+const responseHandle = require("../service/responseHandle");
 const Post = require("../models/postModel");
 const { getPopulatedPosts } = require("../service/postService");
 
 const posts = {
-  async getPosts(req, res) {
+  getPosts: responseHandle.errorAsync(async (req, res, next) => {
     const timeSort = req.query.timeSort === "asc" ? "createdAt" : "-createdAt";
     const q = req.query.q !== undefined ? {"content": new RegExp(req.query.q)} : {};
     const allPosts = await getPopulatedPosts(q, timeSort);
-    
-    successHandle(res, "Post retrieval was successful.", allPosts);
-  },
-  async createPost(req, res) {
-    try{
-      const { body } = req;
-      const newPost = await Post.create({
-        user: body.user,
-        content: body.content
-      });
-  
-      successHandle(res, "Post creation was successful.", newPost);
-    }catch(err){
-      errorHandle(res, err.message);
+    responseHandle.success(res, "Post retrieval was successful.", allPosts);
+  }),
+  createPost: responseHandle.errorAsync(async (req, res, next) => {
+    const { body } = req;
+    if (body.content){
+      const newPost = await Post.create(body);
+      responseHandle.success(res, "Post creation was successful.", newPost);
+    }else{
+      responseHandle.errorNew(400, "The content of the post is required.", next);
     }
-  },
-  async deleteAllPosts(req, res) {
-    try{
+  }),
+  deleteAllPosts: responseHandle.errorAsync(async (req, res, next) => {
+    if (req.originalUrl === "/posts/") {
+      responseHandle.errorNew(404, "No such route found on this server.", next)
+    }else{
       await Post.deleteMany({});
-      successHandle(res, "All posts have been successfully deleted.");
-    }catch(err){
-      errorHandle(res, err.message);
+      responseHandle.success(res, "All posts have been successfully deleted.", Post);
     }
-  },
-  async deleteOnePost(req, res) {
-    try{
-      const id = req.params.id;
-      if (await Post.findById(id) !== null) {
-        await Post.findByIdAndDelete(id);
-        successHandle(res, "The post has been successfully deleted.");
+  }),
+  deleteOnePost: responseHandle.errorAsync(async (req, res, next) => {
+    const id = req.params.id;
+    if (await Post.findById(id) !== null) {
+      await Post.findByIdAndDelete(id);
+      responseHandle.success(res, "The post has been successfully deleted.", Post);
+    }else{
+      responseHandle.errorNew(400, "No matching record was found.", next);
+    }
+  }),
+  updatePosts: responseHandle.errorAsync(async (req, res, next) => {
+    const { body } = req;
+    const id = req.param.id;
+    if (await Post.findById(id) !== null){
+      if(body.content){
+        const updatePost = await Post.findByIdAndUpdate(id); // todo
+        responseHandle.success(res, "The post has been successfully updated.", updatePost);
       }else{
-        errorHandle(res, "No matching record was found.");
+        responseHandle.errorNew(400, "Please provide at least a name or content to proceed.", next);
       }
-    }catch(err){
-      errorHandle(res, err.message);
+    }else{
+      responseHandle.errorNew(400, "No matching record was found.", next);
     }
-  },
-  async updatePosts(req, res) {
-    try{
-      const { body } = req;
-      const id = req.param.id;
-      if (await Post.findById(id) !== null){
-        if(body.content){
-          const updatePost = await Post.findByIdAndUpdate(id); // todo
-          successHandle(res, "The post has been successfully updated.", updatePost);
-        }else{
-          errorHandle(res, "Please provide at least a name or content to proceed.");
-        }
-      }else{
-        errorHandle(res, "No matching record was found.");
-      }
-    }catch(err){
-      errorHandle(res, err.message);
-    }
-  }
+  })
 };
 
 module.exports = posts;
