@@ -8,7 +8,7 @@ const posts = {
     const q = req.query.q !== undefined ? {"content": new RegExp(req.query.q)} : {};
     const allPosts = await getPopulatedPosts(q, timeSort);
     
-    successHandle(res, allPosts);
+    successHandle(res, "Post retrieval was successful.", allPosts);
   },
   async createPost(req, res) {
     try{
@@ -18,7 +18,7 @@ const posts = {
         content: body.content
       });
   
-      successHandle(res, newPost);
+      successHandle(res, "Post creation was successful.", newPost);
     }catch(err){
       errorHandle(res, err.message);
     }
@@ -26,8 +26,7 @@ const posts = {
   async deleteAllPosts(req, res) {
     try{
       await Post.deleteMany({});
-      const allPosts = await getPopulatedPosts();
-      successHandle(res, allPosts);
+      successHandle(res, "All posts have been successfully deleted.");
     }catch(err){
       errorHandle(res, err.message);
     }
@@ -37,8 +36,7 @@ const posts = {
       const id = req.params.id;
       if (await Post.findById(id) !== null) {
         await Post.findByIdAndDelete(id);
-        const allPosts = await getPopulatedPosts();
-        successHandle(res, allPosts);
+        successHandle(res, "The post has been successfully deleted.");
       }else{
         errorHandle(res, "No matching record was found.");
       }
