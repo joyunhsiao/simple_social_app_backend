@@ -25,6 +25,18 @@ const posts = {
       errorHandle(res, err.message);
     }
   },
+  async deleteAllPosts(req, res) {
+    try{
+      await Post.deleteMany({});
+      const allPosts = await Post.find().populate({
+        path: "user",
+        select: "name photo"
+      });
+      successHandle(res, allPosts);
+    }catch(err){
+      errorHandle(res, err.message);
+    }
+  },
 };
 
 module.exports = posts;
