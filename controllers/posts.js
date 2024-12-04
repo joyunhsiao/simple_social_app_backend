@@ -37,6 +37,23 @@ const posts = {
       errorHandle(res, err.message);
     }
   },
+  async deleteOnePost(req, res) {
+    try{
+      const id = req.params.id;
+      if (await Post.findById(id) !== null) {
+        await Post.findByIdAndDelete(id);
+        const allPosts = await Post.find().populate({
+          path: "user",
+          select: "name photo"
+        });
+        successHandle(res, allPosts);
+      }else{
+        errorHandle(res, "No matching record was found.");
+      }
+    }catch(err){
+      errorHandle(res, err.message);
+    }
+  },
 };
 
 module.exports = posts;
