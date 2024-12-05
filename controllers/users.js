@@ -61,6 +61,25 @@ const users = {
     const user = await User.findById(req.params.id);
     responseHandle.success(res, "Data retrieval was successful.", user);
   }),
+  editUser: responseHandle.errorAsync(async (req, res, next) => {
+    if(req.user.id !== req.params.id){
+      return responseHandle.errorNew(401, "You do not have permission.", next);
+    }else{
+      const { name, gender, photo } = req.body;
+      const id = req.params.id;
+      if(!name){
+        return responseHandle.errorNew(400, "Name is not provided.", next);
+      }else{
+        const editUser = await User.findByIdAndUpdate(id, { name, gender, photo }, { new: true, runValidators: true });
+        if(!editUser){
+          return responseHandle.errorNew(400, "Edit failed.", next);
+        }else{
+          const users = await User.find();
+          responseHandle.success(res, "Edit was successful", users)
+        }
+      }
+    }
+  }),
 };
 
 module.exports = users;

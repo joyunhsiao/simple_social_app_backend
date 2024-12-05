@@ -7,5 +7,6 @@ router.post("/register", usersControllers.register);
 router.post("/login", usersControllers.login);
 router.get("/", permission.isAuth, usersControllers.getUsers);
 router.get("/user", permission.isAuth, usersControllers.getUser);
+router.patch("/user/:id/edit", permission.isAuth, usersControllers.editUser);
 
 module.exports = router;
