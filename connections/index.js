@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 dotenv.config({path: "./.env"});
 
 // Mongoose
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const DB = process.env.DB_PATH.replace(
   "<DB_USERNAME>", process.env.DB_USERNAME
