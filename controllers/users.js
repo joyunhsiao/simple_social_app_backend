@@ -37,7 +37,22 @@ const users = {
     });
 
     permission.generateSendJWT(newUser, 201, res);
-  })
+  }),
+  login: responseHandle.errorAsync(async (req, res, next) => {
+    const { email, password } = req.body;
+
+    if(!email || !password) {
+      return next(responseHandle.errorNew(400, "Account and password cannot be empty.", next));
+    }
+
+    const user = await User.findOne({ email }).select("+password");
+    const auth = bcrypt.compare(password, user.password);
+    if(!auth || !user){
+      return next(handleResponse.errorNew(400, "Your password is incorrect.", next));
+    }
+
+    permission.generateSendJWT(user, 200, res);
+  }),
 };
 
 module.exports = users;
