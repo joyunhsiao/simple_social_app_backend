@@ -57,6 +57,10 @@ const users = {
     const allUsers = await User.find();
     responseHandle.success(res, "Data retrieval was successful.", allUsers);
   }),
+  getUser: responseHandle.errorAsync(async (req, res, next) => {
+    const user = await User.findById(req.params.id);
+    responseHandle.success(res, "Data retrieval was successful.", user);
+  }),
 };
 
 module.exports = users;
