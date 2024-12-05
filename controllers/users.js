@@ -80,6 +80,22 @@ const users = {
       }
     }
   }),
+  updatePassword: responseHandle.errorAsync(async(req, res, next) => {
+    // Compare if the passwords match.
+    const { password, confirmPassword } = req.body;
+    if(password !== confirmPassword) {
+      return next(responseHandle.errorNew(400, "Passwords do not match.", next));
+    }
+
+    // The new password needs to be encrypted again.
+    newPassword = await bcrypt.hash(password, 12);
+
+    // Access the database and update the password using the user ID.
+    const user = await User.findByIdAndUpdate(req.user.id, { password: newPassword }, { new: true, runValidators: true });
+    
+    // Send the token to the user.
+    permission.generateSendJWT(user, 200, res);
+  }),
 };
 
 module.exports = users;
