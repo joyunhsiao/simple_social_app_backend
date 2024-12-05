@@ -48,7 +48,7 @@ const users = {
     const user = await User.findOne({ email }).select("+password");
     const auth = bcrypt.compare(password, user.password);
     if(!auth || !user){
-      return next(handleResponse.errorNew(400, "Your password is incorrect.", next));
+      return next(responseHandle.errorNew(400, "Your password is incorrect.", next));
     }
 
     permission.generateSendJWT(user, 200, res);
